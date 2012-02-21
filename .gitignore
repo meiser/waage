@@ -1,0 +1,13 @@
+bin/Debug/data/**/*
+bin/Debug/config
+
+
+bin/Release/data/**/*
+bin/Release/config
+
+obj/
+waage.layout
+waage.cbp.cbTemp
+
+.objs/
+.objsZ/
