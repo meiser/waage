@@ -7,6 +7,8 @@
 
 //#define _WIN32_WINNT 0x0501
 
+#define WAAGE_VERSION "0.1.0"
+
 #include <iostream>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
