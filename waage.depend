@@ -12358,3 +12358,36 @@
 	<termios.h>
 	<unistd.h>
 
+1329291250 source:c:\waage\tinyxml\tinystr.cpp
+	"tinystr.h"
+
+1329291250 c:\waage\tinyxml\tinystr.h
+	<assert.h>
+	<string.h>
+
+1329291250 source:c:\waage\tinyxml\tinyxml.cpp
+	<ctype.h>
+	<sstream>
+	<iostream>
+	"tinyxml.h"
+
+1329291250 c:\waage\tinyxml\tinyxml.h
+	<ctype.h>
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<assert.h>
+	<string>
+	<iostream>
+	<sstream>
+	"tinystr.h"
+
+1329291250 source:c:\waage\tinyxml\tinyxmlerror.cpp
+	"tinyxml.h"
+
+1329291250 source:c:\waage\tinyxml\tinyxmlparser.cpp
+	<ctype.h>
+	<stddef.h>
+	"tinyxml.h"
+	<windows.h>
+

@@ -14,13 +14,9 @@
 #include <boost/program_options.hpp>
 #include <boost/thread.hpp>
 #include <boost/regex.hpp>
-#include <boost/xpressive/xpressive.hpp>
 #include <tinyxml.h>
 
 #include "AsyncSerial.h"
-
-
-
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
