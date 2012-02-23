@@ -1,4 +1,4 @@
-# __Programm zum Auslesen der Brutto- und Nettogewichte fuer die Waage Rhewa 82basic per COM-Port__
+# __Programm zum Auslesen der Brutto- und Nettogewichte fuer die Waage `Rhewa 82basic` per COM-Port__
 
 ## Idee
 
@@ -18,7 +18,7 @@ Ein Beispielaufruf des Programms kann wie folgt aussehen:
 	zwfwaage.exe
 
 Dieser Aufruf erzeugt im Hauptordner des Programms die Datei `last`, die die Messdaten der Rhewa 82basic beinhaltet.
-Je nachdem ob mit Tara gearbeitet wurde können die entstehenden Dateien wie folgt aussehen:
+Je nachdem ob mit Tara gearbeitet wurde koennen die entstehenden Dateien wie folgt aussehen:
 
 ### Ausgabe ueber COM-Port
 
@@ -28,8 +28,8 @@ Je nachdem ob mit Tara gearbeitet wurde können die entstehenden Dateien wie folg
 
 Zur Benutzung des Programms `zwfwaage.exe` muessen folgende Einstellungen an der Konfiguration der Waage vorgenommen werden:
 
-* COM-Port Einstellungen des Programms entsprechend der Geraetekonfiguration unter `G.KONFI` -> INTERFACE -> ... einstellen
-* Handshake fuer COM-Port-Verbindung auf `none` setzen (im Menue `G.KONFI` -> INTERFACE -> `HANDSH`)
+* COM-Port Einstellungen des Programms entsprechend der Geraetekonfiguration unter `G.KONFI` -> `INTERFACE` -> ... einstellen
+* Handshake fuer COM-Port-Verbindung auf `none` setzen (im Menue `G.KONFI` -> `INTERFACE` -> `HANDSH`)
 * Format des Drucks auf `UNIVER` (Universell) stellen (im Menue `G.KONFI` -> `DRUCK` -> `DRUCK.EI` -> `FORMAT`)
 * Anzahl der Datensatzwiederholungen auf `1` setzen (im Menue `G.KONFI` -> `DRUCK` -> `DRUCK.EI` -> `ANZAHL`)
 * EDV-Kommunikation des Gereates auf `aktiv` setzen (im Menue `G.KONFI` -> `DRUCK` -> `EDV.KOM` -> `AKTIV`)
