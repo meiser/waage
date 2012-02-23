@@ -60,6 +60,9 @@ void received(const char *data, unsigned int len)
             break;
         case '\r':
             break;
+        case 0x1B:
+            cout << "Escape entfernt" << endl;
+            break;
         case '\n':
             line += v[i];
             outfile << line;
