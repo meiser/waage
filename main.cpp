@@ -254,12 +254,14 @@ int main(int ac, char* av[])
         static const boost::regex scale_number("^\\s*Nr.\\s*(?<nummer>\\d+).*$");
         // Bereich
         static const boost::regex scale_bereich("^\\s*Bereich\\s*(?<bereich>\\d+).*$");
+
+        // values (brutto, netto and tara) can have point (.) or comma (,)
         // Brutto
-        static const boost::regex scale_brutto("^\\s*Brutto\\s*(?<brutto>\\d+,?\\d*)\\s*(?<einheit>\\S+).*$");
+        static const boost::regex scale_brutto("^\\s*Brutto\\s*(?<brutto>\\d+[.,]\\d*)\\s*(?<einheit>\\S+).*$");
         //Tara
-        static const boost::regex scale_tara("^\\s*Tara\\s*(?<tara>\\d+,?\\d*).*$");
+        static const boost::regex scale_tara("^\\s*Tara\\s*(?<tara>\\d+[.,]\\d*).*$");
         //Netto
-        static const boost::regex scale_netto("^\\s*Netto\\s*(?<netto>\\d+,?\\d*).*$");
+        static const boost::regex scale_netto("^\\s*Netto\\s*(?<netto>\\d+[.,]?\\d*).*$");
 
         string current_line;
         boost::smatch result;
@@ -274,27 +276,36 @@ int main(int ac, char* av[])
             if (regex_search(current_line, result, scale_number))
             {
                 scale_values["nummer"] = result.str("nummer");
+                cout << "Nummer: " << result.str("nummer") << endl;
             }
 
             if (regex_search(current_line, result, scale_bereich))
             {
                 scale_values["bereich"] = result.str("bereich");
+                cout << "Bereich: " << result.str("bereich") << endl;
+
             }
 
             if (regex_search(current_line, result, scale_brutto))
             {
                 scale_values["brutto"] = result.str("brutto");
                 scale_values["einheit"] = result.str("einheit");
+                cout << "Einheit: " << result.str("einheit") << endl;
+                cout << "Brutto: " << result.str("brutto") << endl;
+
+
             }
 
             if (regex_search(current_line, result, scale_tara))
             {
                 scale_values["tara"] = result.str("tara");
+                cout << "Tara: " << result.str("tara") << endl;
             }
 
             if (regex_search(current_line, result, scale_netto))
             {
                 scale_values["netto"] = result.str("netto");
+                cout << "Netto: " << result.str("netto") << endl;
             }
         }
 
