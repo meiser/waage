@@ -112,4 +112,4 @@ Existiert keine Autokonfigurationsdatei greifen die Standardeinstellungen (`COM1
 
 ## Kompilierung
 
-Das `zwf.exe` Repository beinhaltet vorkompilierte Versionen der Anwendungen im bin-Ordner. Dort kann zwischen einer Debug und Release-Version entschieden werden.
+Das `zwfwaage.exe` Repository beinhaltet vorkompilierte Versionen der Anwendungen im bin-Ordner. Dort kann zwischen einer Debug und Release-Version entschieden werden.
