@@ -38,7 +38,7 @@ Je nachdem ob mit Tara gearbeitet wurde koennen die entstehenden Dateien wie fol
 	----------------------------------------
 
 
-Die Werte der letzten Messung werden standardmaeßig in der Datei `last` gespeichert. Wird beim Start des Programms das Kommandozeilenargument `--name` bzw. `n` verwendet. wird die Datei im Ordner `data/{name}` angelegt.
+Die Werte der letzten Messung werden standardmaessig in der Datei `last` gespeichert. Wird beim Start des Programms das Kommandozeilenargument `--name` bzw. `n` verwendet. wird die Datei im Ordner `data/{name}` angelegt.
 
 
 ## Notwendige Einstellungen an der Waage
