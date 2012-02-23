@@ -264,7 +264,9 @@ int main(int ac, char* av[])
         //Tara
         static const boost::regex scale_tara("^\\s*Tara\\s*(?<tara>[-+]?\\d+[.,]\\d*).*$");
         //Netto
-        static const boost::regex scale_netto("^\\s*Netto\\s*(?<netto>[-+]?\\d+[.,]?\\d*).*$");
+
+        // Netto needs special control values ASCII
+        static const boost::regex scale_netto("^\\s*[E]?Netto\\s*(?<netto>[-+]?\\d+[.,]?\\d*).*$");
 
         string current_line;
         boost::smatch result;
