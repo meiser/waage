@@ -17,7 +17,7 @@
 #include <boost/thread.hpp>
 #include <boost/regex.hpp>
 #include <tinyxml.h>
-
+#include <string>
 
 #include <map>
 #include "AsyncSerial.h"
@@ -30,7 +30,7 @@ using namespace std;
 
 // globale Ordner timestamp_dir and diretory_name, created in main() on startup;
 
-fs::path scale_file_name;
+fs::path scale_file_name("last");
 fs::path scale_file_directory;
 fs::path programm_root;
 fs::path config_file_name("config");
@@ -159,17 +159,6 @@ void load_xml_settings(fs::path config_file_path)
     }
 }
 
-
-
-
-void my_thread(fs::path full_path)
-{
-    boost::this_thread::sleep(pt::milliseconds(10000));
-    fs::path test = "MIKE1234";
-    fs::create_directories(scale_file_directory/test);
-}
-
-
 int main(int ac, char* av[])
 {
     try
@@ -226,16 +215,21 @@ int main(int ac, char* av[])
             return 200;
         }
 
+
         if (vm.count("name"))
         {
             scale_file_name = vm["name"].as<string>();
-
             scale_file_directory = programm_root / data_path / scale_file_name;
-            fs::create_directories(scale_file_directory);
-            fs::fstream textfile;
-            textfile.open(scale_file_directory / scale_file_name, ios_base::out);
-            textfile.close();
         }
+        else
+        {
+            scale_file_directory = programm_root;
+        }
+
+        fs::create_directories(scale_file_directory);
+        fs::fstream textfile;
+        textfile.open(scale_file_directory / scale_file_name, ios_base::out);
+        textfile.close();
 
         cout << "Connection to " << fmp_com_port << " with " << fmp_baudrate << endl;
 
@@ -306,34 +300,37 @@ int main(int ac, char* av[])
 
         map<string, string>::iterator iter = scale_values.find("netto");
 
+
+        string weight;
+
+
         if ( scale_values.end() != iter ) {
-            cout << "Es gibt Netto: " << scale_values["netto"] << endl;
+            weight = scale_values["netto"];
         }
         else
         {
-            cout << "Es gibt nur Brutto: " << scale_values["brutto"] << endl;
+            weight = scale_values["brutto"];
         }
 
-        //cout << scale_values["netto"] << endl;
+        weight.erase(weight.end()-2, weight.end()-1);
 
-
-        return 1;//boost::lexical_cast<int>(scale_values["netto"]);
+        return boost::lexical_cast<int>(weight+"00");
     }
     catch(boost::system::system_error& e)
     {
         cout<<"Boost System Fehler: "<<e.what()<<endl;
-        return 400;
+        return 2147483500;
     }
     catch(boost::program_options::unknown_option& e)
     {
         cout << "Parameter falsch: "<<e.what()<<endl;
         cout << "--help zeigt alle Optionen auf" <<endl;
-        return 400;
+        return 2147483500;
     }
     catch(boost::program_options::invalid_command_line_syntax &e)
     {
         cout<<"Bitte Argument angeben: "<<e.what()<<endl;
-        return 400;
+        return 2147483500;
     }
 }
 

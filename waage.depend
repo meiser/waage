@@ -12391,3 +12391,69 @@
 	"tinyxml.h"
 	<windows.h>
 
+1329993397 source:c:\projekte\waage\main.cpp
+	<iostream>
+	<boost/filesystem.hpp>
+	<boost/filesystem/fstream.hpp>
+	<boost/program_options.hpp>
+	<boost/thread.hpp>
+	<boost/regex.hpp>
+	<tinyxml.h>
+	<string>
+	<map>
+	"AsyncSerial.h"
+
+1329291250 c:\projekte\waage\tinyxml\tinyxml.h
+	<ctype.h>
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<assert.h>
+	<string>
+	<iostream>
+	<sstream>
+	"tinystr.h"
+
+1329291250 c:\projekte\waage\tinyxml\tinystr.h
+	<assert.h>
+	<string.h>
+
+1329221906 c:\projekte\waage\asyncserial.h
+	<vector>
+	<boost/asio.hpp>
+	<boost/bind.hpp>
+	<boost/thread.hpp>
+	<boost/utility.hpp>
+	<boost/function.hpp>
+	<boost/shared_array.hpp>
+
+1329291250 source:c:\projekte\waage\tinyxml\tinystr.cpp
+	"tinystr.h"
+
+1329291250 source:c:\projekte\waage\tinyxml\tinyxml.cpp
+	<ctype.h>
+	<sstream>
+	<iostream>
+	"tinyxml.h"
+
+1329291250 source:c:\projekte\waage\tinyxml\tinyxmlerror.cpp
+	"tinyxml.h"
+
+1329291250 source:c:\projekte\waage\tinyxml\tinyxmlparser.cpp
+	<ctype.h>
+	<stddef.h>
+	"tinyxml.h"
+	<windows.h>
+
+1329220802 source:c:\projekte\waage\asyncserial.cpp
+	"AsyncSerial.h"
+	<string>
+	<algorithm>
+	<iostream>
+	<boost/bind.hpp>
+	<sys/types.h>
+	<sys/stat.h>
+	<fcntl.h>
+	<termios.h>
+	<unistd.h>
+

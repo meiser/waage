@@ -11,7 +11,7 @@
 				<Option object_output="obj\Debug\" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option parameters="--i COM1 --b 9600 --d test" />
+				<Option parameters="--p COM1 --b 9600 --n test" />
 				<Compiler>
 					<Add option="-Wall" />
 				</Compiler>

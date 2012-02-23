@@ -1,9 +1,10 @@
 bin/Debug/data/**/*
 bin/Debug/config
-
+bin/Debug/last
 
 bin/Release/data/**/*
 bin/Release/config
+bin/Release/last
 
 obj/
 waage.layout
