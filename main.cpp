@@ -257,11 +257,11 @@ int main(int ac, char* av[])
 
         // values (brutto, netto and tara) can have point (.) or comma (,)
         // Brutto
-        static const boost::regex scale_brutto("^\\s*Brutto\\s*(?<brutto>\\d+[.,]\\d*)\\s*(?<einheit>\\S+).*$");
+        static const boost::regex scale_brutto("^\\s*Brutto\\s*(?<brutto>[-+]?\\d+[.,]\\d*)\\s*(?<einheit>\\S+).*$");
         //Tara
-        static const boost::regex scale_tara("^\\s*Tara\\s*(?<tara>\\d+[.,]\\d*).*$");
+        static const boost::regex scale_tara("^\\s*Tara\\s*(?<tara>[-+]?\\d+[.,]\\d*).*$");
         //Netto
-        static const boost::regex scale_netto("^\\s*Netto\\s*(?<netto>\\d+[.,]?\\d*).*$");
+        static const boost::regex scale_netto("^\\s*Netto\\s*(?<netto>[-+]?\\d+[.,]?\\d*).*$");
 
         string current_line;
         boost::smatch result;
@@ -325,7 +325,16 @@ int main(int ac, char* av[])
 
         weight.erase(weight.end()-2, weight.end()-1);
 
-        return boost::lexical_cast<int>(weight+"00");
+        int weight_return = boost::lexical_cast<int>(weight+"00");
+
+        if (weight_return >= 0)
+        {
+            return weight_return;
+        }
+        else
+        {
+            return 2147483500;
+        }
     }
     catch(boost::system::system_error& e)
     {
