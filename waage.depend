@@ -1,13 +1,13 @@
 # depslib dependency file v1.0
-1329817701 source:c:\waage\main.cpp
+1329986476 source:c:\waage\main.cpp
 	<iostream>
 	<boost/filesystem.hpp>
 	<boost/filesystem/fstream.hpp>
 	<boost/program_options.hpp>
 	<boost/thread.hpp>
 	<boost/regex.hpp>
-	<boost/xpressive/xpressive.hpp>
 	<tinyxml.h>
+	<map>
 	"AsyncSerial.h"
 
 1321164655 c:\programme\boost\boost_1_48_0\boost\filesystem.hpp

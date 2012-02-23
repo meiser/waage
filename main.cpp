@@ -18,6 +18,8 @@
 #include <boost/regex.hpp>
 #include <tinyxml.h>
 
+
+#include <map>
 #include "AsyncSerial.h"
 
 namespace po = boost::program_options;
@@ -28,26 +30,26 @@ using namespace std;
 
 // globale Ordner timestamp_dir and diretory_name, created in main() on startup;
 
-fs::path timestamp_dir;
-fs::path directory_name;
+fs::path scale_file_name;
+fs::path scale_file_directory;
 fs::path programm_root;
 fs::path config_file_name("config");
+
+// directory for storing all scale files
 fs::path data_path("data");
 
 string fmp_com_port = "COM1";
 int fmp_baudrate = 9600;
 
-
 bool console_mode=false;
-
-
 
 
 // Callback , speichert Daten lokal zwischen
 void received(const char *data, unsigned int len)
 {
     vector<char> v(data,data+len);
-    fs::ofstream outfile(timestamp_dir/directory_name, ios_base::app);
+    fs::ofstream outfile(scale_file_directory/scale_file_name, ios_base::app);
+    string line;
     for(unsigned int i=0; i<v.size(); i++)
     {
         // Enfernung von Tabulatoren und Zeilenvorschub
@@ -58,8 +60,14 @@ void received(const char *data, unsigned int len)
             break;
         case '\r':
             break;
+        case '\n':
+            line += v[i];
+            outfile << line;
+            line = "";
+            break;
+
         default:
-            outfile << v[i];
+            line += v[i];
         }
     }
     outfile.close();
@@ -67,7 +75,6 @@ void received(const char *data, unsigned int len)
 
 void received_for_console(const char *data, unsigned int len)
 {
-
     vector<char> v(data,data+len);
     for(unsigned int i=0; i<v.size(); i++)
     {
@@ -88,7 +95,6 @@ int console()
 {
     try
     {
-
         CallbackAsyncSerial serial(fmp_com_port, fmp_baudrate);
         serial.setCallback(received_for_console);
 
@@ -103,7 +109,7 @@ int console()
                 cout << "Befehl "+ command+" wird abgeschickt" << endl;
                 cout << endl;
 
-                serial.writeString(command+"\r\n");
+                serial.writeString(command);
             }
             else
             {
@@ -153,6 +159,17 @@ void load_xml_settings(fs::path config_file_path)
     }
 }
 
+
+
+
+void my_thread(fs::path full_path)
+{
+    boost::this_thread::sleep(pt::milliseconds(10000));
+    fs::path test = "MIKE1234";
+    fs::create_directories(scale_file_directory/test);
+}
+
+
 int main(int ac, char* av[])
 {
     try
@@ -164,10 +181,10 @@ int main(int ac, char* av[])
         // Declare the supported options.
         po::options_description desc("Allowed options");
         desc.add_options()
+        ("name,n", po::value<string>(), "name of file and directory for scale file")
         ("help,h", "produce help message")
-        ("start_time,s", po::value<string>()->implicit_value(""), "start time")
         ("console,c", po::value<string>()->implicit_value(""), "interactive COM Port mode")
-        ("input,i", po::value<string>()->implicit_value(fmp_com_port), "used com port connection. e.g. COM1 or /dev/ttyS0")
+        ("port,p", po::value<string>()->implicit_value(fmp_com_port), "used com port connection. e.g. COM1 or /dev/ttyS0")
         ("baudrate,b", po::value<string>()->implicit_value(boost::lexical_cast<string>(fmp_baudrate)), "baudrate for com port connection")
         ("file,f", po::value<string>(), "path to config file")
         ;
@@ -186,24 +203,15 @@ int main(int ac, char* av[])
             load_xml_settings(programm_root/config_file_name);
         }
 
-
-
         if (vm.count("help"))
         {
             cout << desc << "\n";
             return 200;
         }
 
-        if (vm.count("console"))
+        if (vm.count("port"))
         {
-            console();
-            return 200;
-        }
-
-
-        if (vm.count("input"))
-        {
-            fmp_com_port = vm["input"].as<string>();
+            fmp_com_port = vm["port"].as<string>();
         }
 
         if (vm.count("baudrate"))
@@ -211,210 +219,105 @@ int main(int ac, char* av[])
             fmp_baudrate = boost::lexical_cast<int>(vm["baudrate"].as<string>());
         }
 
-        if (vm.count("start_time"))
+        if (vm.count("console"))
         {
-            directory_name = vm["start_time"].as<string>();
-            data_path = "data";
-            timestamp_dir = programm_root / data_path / directory_name;
-            fs::create_directories(timestamp_dir);
-            fs::fstream textfile;
-            textfile.open(timestamp_dir / directory_name, ios_base::out);
-            textfile.close();
+            cout << "Virtual console connection to " << fmp_com_port << " with " << fmp_baudrate << endl;
+            console();
+            return 200;
         }
-        else
+
+        if (vm.count("name"))
         {
-            cout << "Zeitstring muss angegeben werden: --start_time <int> \n";
-            return 400;
+            scale_file_name = vm["name"].as<string>();
+
+            scale_file_directory = programm_root / data_path / scale_file_name;
+            fs::create_directories(scale_file_directory);
+            fs::fstream textfile;
+            textfile.open(scale_file_directory / scale_file_name, ios_base::out);
+            textfile.close();
         }
 
         cout << "Connection to " << fmp_com_port << " with " << fmp_baudrate << endl;
 
         CallbackAsyncSerial serial(fmp_com_port, fmp_baudrate);
         serial.setCallback(received);
-        serial.writeString("SAM\r\n");
+        serial.writeString("<FP>");
         int first;
         int second;
         bool still_changing = true;
         while (still_changing)
         {
-            first = fs::file_size(timestamp_dir / directory_name);
+            first = fs::file_size(scale_file_directory / scale_file_name);
             boost::this_thread::sleep(pt::milliseconds(1000));
-            second = fs::file_size(timestamp_dir / directory_name);
+            second = fs::file_size(scale_file_directory / scale_file_name);
             if (second == first)
             {
                 still_changing = false;
             }
         }
 
-        //get file separator
-
-        //Regex für Findung Auftragsnummer und Kommentar
-        static const boost::regex block_comment("^Block-Kommentar:(?<orno>\\d+)?\\s*(?<comment>.*)$");
-        //Regex für Findung Blockseparator, zeigt Beginn eines neuen Blocks an, im Geraet sind moeglich
-        //GS Hex code 0x1d (none printable characters ASCII, http://web.cs.mun.ca/~michael/c/ascii-table.html)
-        //,
-        //*
-        //;
-        //#
-        //:
-        static const boost::regex separator("^(?<sep>[,*;#:]|\x1d)$");
-        //Regex für Findung der Messwerte
-        static const boost::regex measure_value("^(?<value>[-+]?\\d+\\.\\d+)$");
-        //Regex für Applikationsname
-        static const boost::regex application_regex("^Appl-Name:(?<app>.+)$");
-        //Regex für Datum
-        //static const boost::regex date_regex("^Datum:(?<date>.+)$");
-
-        static const boost::regex date_regex("^Datum:0?(?<day>\\d+)\\.0?(?<month>\\d*)\\.(?<year>\\d+)$");
-        //Regex für Zeit
-        //static const boost::regex time_regex("^Zeit:(?<time>.+)$");
-        static const boost::regex time_regex("^Zeit:0?(?<hour>\\d+):0?(?<minute>\\d+)$");
-
-
-        //Regex für obere Toleranzgrenze und Einheit
-        static const boost::regex max_value_regex("^obere Toleranzgr.:(?<max>[-+]?\\d+)(?<unit>.+)$");
-        //Regex für obere Toleranzgrenze
-        static const boost::regex min_value_regex("^untere Toleranzgr.:(?<min>[-+]?\\d+)(?<unit>.+)$");
-
-        //Applikationsnamen
-        string application_name;
-        //Blockkommentar
-        string comment;
-        //Ornonumber
-        string orno_number;
-        //Blockdatum zerlegt
-        string block_day;
-        string block_month;
-        string block_year;
-        //Blockzeit zerlegt
-        string block_hour;
-        string block_minute;
-        //obere Grenze
-        string border_max;
-        //untere Grenze
-        string border_min;
-        //Einheit
-        string unit;
-        //Blockanzahl
-        int amount_blocks = 0;
-        //Messwerte abgespeichert in Stringliste
-        list<string> values;
-
-        //Kopf XML-Datei
-        TiXmlDocument doc;
-        TiXmlDeclaration * decl = new TiXmlDeclaration( "1.0", "utf-8", "yes" );
-        TiXmlElement * application = new TiXmlElement( "application" );
-
-        cout << "Beginn Erstellung XML Datei..." << endl;
+        // Nummer Waage, wird intern erzeugt
+        static const boost::regex scale_number("^\\s*Nr.\\s*(?<nummer>\\d+).*$");
+        // Bereich
+        static const boost::regex scale_bereich("^\\s*Bereich\\s*(?<bereich>\\d+).*$");
+        // Brutto
+        static const boost::regex scale_brutto("^\\s*Brutto\\s*(?<brutto>\\d+,?\\d*)\\s*(?<einheit>\\S+).*$");
+        //Tara
+        static const boost::regex scale_tara("^\\s*Tara\\s*(?<tara>\\d+,?\\d*).*$");
+        //Netto
+        static const boost::regex scale_netto("^\\s*Netto\\s*(?<netto>\\d+,?\\d*).*$");
 
         string current_line;
-        //Ergebnis Regex
         boost::smatch result;
-        //Datei
-        fs::ifstream fin(timestamp_dir / directory_name);
 
-        //Durchsuchung Datei pro Zeile und Extrahierung der Blockdaten
+        map<string,string> scale_values;
+
+        fs::ifstream fin(scale_file_directory / scale_file_name);
         while(getline(fin, current_line))
         {
             // Ende des Blocks erreicht, Aufbau der XML
 
-            if (regex_search(current_line, result, separator))
+            if (regex_search(current_line, result, scale_number))
             {
-                amount_blocks++;
-                cout << "Block " << amount_blocks << " mit " << values.size() << " Messwerten fertig, Beginne Verarbeitung in XML mit: " << endl;
-                cout << "#######################################################################" << endl;
-                cout << "Anwendung: " << application_name << endl;
-                cout << "Auftragsnummer: " << orno_number << endl;
-                cout << "Kommentar: " << comment << endl;
-                cout << "Stunde: " << block_hour << endl;
-                cout << "Minute: " << block_minute << endl;
-                cout << "Tag: " << block_day << endl;
-                cout << "Monat: " << block_month << endl;
-                cout << "Jahr: " << block_year << endl;
-                cout << "Max: " << border_max << endl;
-                cout << "Einheit: " << unit << endl;
-                cout << "Min: " << border_min << endl;
-
-                //Application-Element existiert nur einmal
-                if (amount_blocks == 1)
-                {
-                    application->SetAttribute("name", application_name.data());
-                    application->SetAttribute("max", border_max.data());
-                    application->SetAttribute("min", border_min.data());
-                    application->SetAttribute("unit", unit.data());
-                    doc.LinkEndChild( decl );
-                    doc.LinkEndChild( application );
-                }
-                TiXmlElement * block = new TiXmlElement( "block" );
-                block->SetAttribute("ordernumber",orno_number.data());
-                block->SetAttribute("day",block_day.data());
-                block->SetAttribute("month",block_month.data());
-                block->SetAttribute("year",block_year.data());
-                block->SetAttribute("hour",block_hour.data());
-                block->SetAttribute("minute",block_minute.data());
-                block->SetAttribute("comment",comment.data());
-                block->SetAttribute("amount", values.size());
-
-                application->LinkEndChild(block);
-
-
-                for (list<string>::const_iterator iterator = values.begin(), end = values.end(); iterator != end; ++iterator)
-                {
-                    //*iterator
-                    string value = *iterator;
-                    TiXmlElement * value_element = new TiXmlElement( "value" );
-                    value_element->LinkEndChild( new TiXmlText(value.c_str()));
-                    block->LinkEndChild(value_element);
-                }
-                values.clear();
+                scale_values["nummer"] = result.str("nummer");
             }
 
-            if(regex_search(current_line, result, measure_value))
+            if (regex_search(current_line, result, scale_bereich))
             {
-                values.push_back(result.str("value"));
+                scale_values["bereich"] = result.str("bereich");
             }
 
-            if(regex_search(current_line, result, block_comment))
+            if (regex_search(current_line, result, scale_brutto))
             {
-                comment = result.str("comment");
-                orno_number = result.str("orno");
+                scale_values["brutto"] = result.str("brutto");
+                scale_values["einheit"] = result.str("einheit");
             }
 
-            if (regex_search(current_line, result, application_regex))
+            if (regex_search(current_line, result, scale_tara))
             {
-                application_name = result.str("app");
+                scale_values["tara"] = result.str("tara");
             }
 
-            if (regex_search(current_line, result, date_regex))
+            if (regex_search(current_line, result, scale_netto))
             {
-                block_day = result.str("day");
-                block_month = result.str("month");
-                block_year = result.str("year");
-            }
-
-            if (regex_search(current_line, result, time_regex))
-            {
-                block_hour = result.str("hour");
-                block_minute = result.str("minute");
-            }
-
-            if (regex_search(current_line, result, max_value_regex))
-            {
-                border_max = result.str("max");
-                unit = result.str("unit");
-            }
-
-            if (regex_search(current_line, result, min_value_regex))
-            {
-                border_min = result.str("min");
+                scale_values["netto"] = result.str("netto");
             }
         }
-        cout << "Anzahl Bloecke: " << amount_blocks << endl;
-        fs::path xml_file_name = "messdaten.xml";
-        fs::path full_xml_path = timestamp_dir / xml_file_name;
-        doc.SaveFile(full_xml_path.string().c_str());
 
-        return 1;
+        map<string, string>::iterator iter = scale_values.find("netto");
+
+        if ( scale_values.end() != iter ) {
+            cout << "Es gibt Netto: " << scale_values["netto"] << endl;
+        }
+        else
+        {
+            cout << "Es gibt nur Brutto: " << scale_values["brutto"] << endl;
+        }
+
+        //cout << scale_values["netto"] << endl;
+
+
+        return 1;//boost::lexical_cast<int>(scale_values["netto"]);
     }
     catch(boost::system::system_error& e)
     {

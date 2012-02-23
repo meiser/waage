@@ -11,7 +11,7 @@
 				<Option object_output="obj\Debug\" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option parameters="--start_time 1234567890 " />
+				<Option parameters="--i COM1 --b 9600 --d test" />
 				<Compiler>
 					<Add option="-Wall" />
 				</Compiler>
@@ -53,23 +53,25 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions -DBOOST_THREAD_USE_LIB=1 -D_WIN32_WINNT=0x0501" />
 			<Add directory="$(#boost)" />
-			<Add directory="include" />
-			<Add directory="src" />
-			<Add directory="Z:\tinyxml" />
+			<Add directory="tinyxml" />
 		</Compiler>
+		<ResourceCompiler>
+			<Add directory="tinyxml" />
+		</ResourceCompiler>
 		<Linker>
 			<Add option="-lws2_32" />
 			<Add directory="$(#boost.lib)" />
+			<Add directory="tinyxml" />
 		</Linker>
 		<Unit filename="AsyncSerial.cpp" />
 		<Unit filename="AsyncSerial.h" />
 		<Unit filename="main.cpp" />
-		<Unit filename="Z:\tinyxml\tinystr.cpp" />
-		<Unit filename="Z:\tinyxml\tinystr.h" />
-		<Unit filename="Z:\tinyxml\tinyxml.cpp" />
-		<Unit filename="Z:\tinyxml\tinyxml.h" />
-		<Unit filename="Z:\tinyxml\tinyxmlerror.cpp" />
-		<Unit filename="Z:\tinyxml\tinyxmlparser.cpp" />
+		<Unit filename="tinyxml\tinystr.cpp" />
+		<Unit filename="tinyxml\tinystr.h" />
+		<Unit filename="tinyxml\tinyxml.cpp" />
+		<Unit filename="tinyxml\tinyxml.h" />
+		<Unit filename="tinyxml\tinyxmlerror.cpp" />
+		<Unit filename="tinyxml\tinyxmlparser.cpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />
