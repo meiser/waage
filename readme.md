@@ -20,8 +20,25 @@ Ein Beispielaufruf des Programms kann wie folgt aussehen:
 Dieser Aufruf erzeugt im Hauptordner des Programms die Datei `last`, die die Messdaten der Rhewa 82basic beinhaltet.
 Je nachdem ob mit Tara gearbeitet wurde koennen die entstehenden Dateien wie folgt aussehen:
 
-### Ausgabe ueber COM-Port
+### COM-Port-Ausgabe ohne Tara
 
+	Nr.        508
+	Bereich                                1
+	Brutto                          439,0 kg
+	----------------------------------------
+
+
+## COM-Port-Ausgabe bei Verwendung Tara
+
+	Nr.        508
+	Bereich                                1
+	Brutto                          439,0 kg
+	Tara                            164,5 kg
+	Netto                           274,5 kg
+	----------------------------------------
+
+
+Die Werte der letzten Messung werden standardmaeﬂig in der Datei `last` gespeichert. Wird beim Start des Programms das Kommandozeilenargument `--name` bzw. `n` verwendet. wird die Datei im Ordner `data/{name}` angelegt.
 
 
 ## Notwendige Einstellungen an der Waage
