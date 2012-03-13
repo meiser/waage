@@ -11,6 +11,10 @@ Im Quellcode ist bereits vorgesehen, dass die Ausgabe des Geraetes auch als XML 
 * [TinyXML](http://www.grinninglizard.com/tinyxml "TinyXML")
 * [serial-port](http://gitorious.org/serial-port "serial-port")
 
+## Installation
+
+Das Programm `zwfwaage.exe` kann einfach per Mausklick oder über die Kommandozeile gestartet werden. Zur Nutzung mit der Baan-Session `tibde9115m900` muss der GESAMTE Inhalt des Ordners `waage\bin\Release` bzw. `waage\bin\Debug` nach `C:\waage` kopiert werden.
+
 ## Nutzunung des Programms
 
 Ein Beispielaufruf des Programms kann wie folgt aussehen:
