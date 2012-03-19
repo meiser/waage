@@ -53,12 +53,12 @@ Zur Benutzung des Programms `zwfwaage.exe` muessen folgende Einstellungen an der
 * Handshake fuer COM-Port-Verbindung auf `none` setzen (im Menue `G.KONFI` -> `INTERFACE` -> `HANDSH`)
 * Format des Drucks auf `UNIVER` (Universell) stellen (im Menue `G.KONFI` -> `DRUCK` -> `DRUCK.EI` -> `FORMAT`)
 * Anzahl der Datensatzwiederholungen auf `1` setzen (im Menue `G.KONFI` -> `DRUCK` -> `DRUCK.EI` -> `ANZAHL`)
-* EDV-Kommunikation des Gereates auf `aktiv` setzen (im Menue `G.KONFI` -> `DRUCK` -> `EDV.KOM` -> `AKTIV`)
+* EDV-Kommunikation des Geraetes auf `aktiv` setzen (im Menue `G.KONFI` -> `DRUCK` -> `EDV.KOM` -> `AKTIV`)
 
 ## Anforderungen
 
 * Rechner mit verfuegbarem seriellen COM-Port
-* Windows XP, Windows Vista oder Windows 7
+* Linux ab Kernel 2.6.x, Windows XP, Windows Vista, Windows 7, Mac OSX 10.5.x oder hoeher
 * Bearbeitung der Projektdatei mit Codeblocks (IDE) und Kompilierung mit der C++ Boost Bibliothek
 
 ## Kommandozeilenargumente
