@@ -15,7 +15,7 @@ Im Quellcode ist bereits vorgesehen, dass die Ausgabe des Geraetes auch als XML 
 
 Das Programm `zwfwaage.exe` kann einfach per Mausklick oder über die Kommandozeile gestartet werden. Zur Nutzung mit der Baan-Session `tibde9115m900` muss der GESAMTE Inhalt des Ordners `waage\bin\Release` bzw. `waage\bin\Debug` nach `C:\waage` kopiert werden.
 
-## Nutzunung des Programms
+## Nutzung des Programms
 
 Ein Beispielaufruf des Programms kann wie folgt aussehen:
 
@@ -32,7 +32,7 @@ Je nachdem ob mit Tara gearbeitet wurde koennen die entstehenden Dateien wie fol
 	----------------------------------------
 
 
-## COM-Port-Ausgabe bei Verwendung Tara
+### COM-Port-Ausgabe bei Verwendung Tara
 
 	Nr.        508
 	Bereich                                1
