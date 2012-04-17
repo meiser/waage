@@ -68,7 +68,7 @@ Das Programm `zwfwaage.exe` kann mit folgenden Startparametern ausgefuehrt werde
 * `--help, --h` Listet alle zulaessigen Kommandozeilenargumente und ihre Funktionsbeschreibung auf
 * `--name, --n` Angabe des Dateinamens, in dem die Daten der Messung gespeichert werden.
 * `--console, --c` Startet des Programm im interaktiven Konsolenmodus
-* `--p, --p` Angabe des COM-Ports z.B. --p COM1 oder --p /dev/ttyS0, Standard ist COM1
+* `--port, --p` Angabe des COM-Ports z.B. --p COM1 oder --p /dev/ttyS0, Standard ist COM1
 * `--baudrate, --b` Angabe der Uebertragungsgeschwindigkeit des COM-Ports, Standard ist 9600
 * `--file, --f` Angabe des Pfades zu einer Konfigurationsdatei
 
