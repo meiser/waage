@@ -11,7 +11,11 @@ Im Quellcode ist bereits vorgesehen, dass die Ausgabe des Geraetes auch als XML 
 * [TinyXML](http://www.grinninglizard.com/tinyxml "TinyXML")
 * [serial-port](http://gitorious.org/serial-port "serial-port")
 
-## Nutzunung des Programms
+## Installation
+
+Das Programm `zwfwaage.exe` kann einfach per Mausklick oder über die Kommandozeile gestartet werden. Zur Nutzung mit der Baan-Session `tibde9115m900` muss der GESAMTE Inhalt des Ordners `waage\bin\Release` bzw. `waage\bin\Debug` nach `C:\waage` kopiert werden.
+
+## Nutzung des Programms
 
 Ein Beispielaufruf des Programms kann wie folgt aussehen:
 
@@ -28,7 +32,7 @@ Je nachdem ob mit Tara gearbeitet wurde koennen die entstehenden Dateien wie fol
 	----------------------------------------
 
 
-## COM-Port-Ausgabe bei Verwendung Tara
+### COM-Port-Ausgabe bei Verwendung Tara
 
 	Nr.        508
 	Bereich                                1
@@ -49,12 +53,12 @@ Zur Benutzung des Programms `zwfwaage.exe` muessen folgende Einstellungen an der
 * Handshake fuer COM-Port-Verbindung auf `none` setzen (im Menue `G.KONFI` -> `INTERFACE` -> `HANDSH`)
 * Format des Drucks auf `UNIVER` (Universell) stellen (im Menue `G.KONFI` -> `DRUCK` -> `DRUCK.EI` -> `FORMAT`)
 * Anzahl der Datensatzwiederholungen auf `1` setzen (im Menue `G.KONFI` -> `DRUCK` -> `DRUCK.EI` -> `ANZAHL`)
-* EDV-Kommunikation des Gereates auf `aktiv` setzen (im Menue `G.KONFI` -> `DRUCK` -> `EDV.KOM` -> `AKTIV`)
+* EDV-Kommunikation des Geraetes auf `aktiv` setzen (im Menue `G.KONFI` -> `DRUCK` -> `EDV.KOM` -> `AKTIV`)
 
 ## Anforderungen
 
 * Rechner mit verfuegbarem seriellen COM-Port
-* Windows XP, Windows Vista oder Windows 7
+* Linux ab Kernel 2.6.x, Windows XP, Windows Vista, Windows 7, Mac OSX 10.5.x oder hoeher
 * Bearbeitung der Projektdatei mit Codeblocks (IDE) und Kompilierung mit der C++ Boost Bibliothek
 
 ## Kommandozeilenargumente
@@ -64,7 +68,7 @@ Das Programm `zwfwaage.exe` kann mit folgenden Startparametern ausgefuehrt werde
 * `--help, --h` Listet alle zulaessigen Kommandozeilenargumente und ihre Funktionsbeschreibung auf
 * `--name, --n` Angabe des Dateinamens, in dem die Daten der Messung gespeichert werden.
 * `--console, --c` Startet des Programm im interaktiven Konsolenmodus
-* `--p, --p` Angabe des COM-Ports z.B. --p COM1 oder --p /dev/ttyS0, Standard ist COM1
+* `--port, --p` Angabe des COM-Ports z.B. --p COM1 oder --p /dev/ttyS0, Standard ist COM1
 * `--baudrate, --b` Angabe der Uebertragungsgeschwindigkeit des COM-Ports, Standard ist 9600
 * `--file, --f` Angabe des Pfades zu einer Konfigurationsdatei
 
