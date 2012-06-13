@@ -38,8 +38,13 @@ fs::path config_file_name("config");
 // directory for storing all scale files
 fs::path data_path("data");
 
-string fmp_com_port = "COM1";
-int fmp_baudrate = 9600;
+string com_port = "COM1";
+int baudrate = 9600;
+int databits = 8;
+int stopbits = 1;
+string parity = "0";
+
+//boost::asio::serial_port_base::parity parity(boost::asio::serial_port_base::parity::none);
 
 bool console_mode=false;
 
@@ -98,7 +103,7 @@ int console()
 {
     try
     {
-        CallbackAsyncSerial serial(fmp_com_port, fmp_baudrate);
+        CallbackAsyncSerial serial(com_port, baudrate);
         serial.setCallback(received_for_console);
 
         string command = "";
@@ -144,14 +149,14 @@ void load_xml_settings(fs::path config_file_path)
         {
             if (regex_search(current_line, result, com_port_regex))
             {
-                fmp_com_port = result.str("port");
+                com_port = result.str("port");
             }
 
             if (regex_search(current_line, result, baudrate_regex))
             {
                 try
                 {
-                    fmp_baudrate = boost::lexical_cast<int>(result.str("baudrate"));
+                    baudrate = boost::lexical_cast<int>(result.str("baudrate"));
                 }
                 catch( boost::bad_lexical_cast const& )
                 {
@@ -175,9 +180,13 @@ int main(int ac, char* av[])
         desc.add_options()
         ("name,n", po::value<string>(), "name of file and directory for scale file")
         ("help,h", "produce help message")
-        ("console,c", po::value<string>()->implicit_value(""), "interactive COM Port mode")
-        ("port,p", po::value<string>()->implicit_value(fmp_com_port), "used com port connection. e.g. COM1 or /dev/ttyS0")
-        ("baudrate,b", po::value<string>()->implicit_value(boost::lexical_cast<string>(fmp_baudrate)), "baudrate for com port connection")
+        ("interactive,i", "activate interactive COM Port mode")
+        ("comport,c", po::value<string>()->implicit_value(com_port), "used com port connection. e.g. COM1 or /dev/ttyS0")
+        ("baudrate,b", po::value<string>()->implicit_value(boost::lexical_cast<string>(baudrate)), "baudrate for com port connection")
+        ("databits,d", po::value<string>()->implicit_value(boost::lexical_cast<string>(databits)), "databits for com port connection")
+        ("stopbits,s", po::value<string>()->implicit_value(boost::lexical_cast<string>(stopbits)), "stopbits for com port connection")
+        ("parity,p", po::value<string>()->implicit_value(boost::lexical_cast<string>(parity)), "parity for com port connection: [n]o,[o]dd, [e]ven, [m]ark, [s]pace")
+
         ("file,f", po::value<string>(), "path to config file")
         ;
         po::variables_map vm;
@@ -201,19 +210,74 @@ int main(int ac, char* av[])
             return 200;
         }
 
-        if (vm.count("port"))
+        if (vm.count("comport"))
         {
-            fmp_com_port = vm["port"].as<string>();
+            com_port = vm["comport"].as<string>();
         }
 
         if (vm.count("baudrate"))
         {
-            fmp_baudrate = boost::lexical_cast<int>(vm["baudrate"].as<string>());
+            baudrate = boost::lexical_cast<int>(vm["baudrate"].as<string>());
         }
 
-        if (vm.count("console"))
+        if (vm.count("databits"))
         {
-            cout << "Virtual console connection to " << fmp_com_port << " with " << fmp_baudrate << endl;
+            databits = boost::lexical_cast<int>(vm["databits"].as<string>());
+        }
+
+        if (vm.count("stopbits"))
+        {
+            stopbits = boost::lexical_cast<int>(vm["stopbits"].as<string>());
+        }
+
+        /*if (vm.count("parity"))
+        {
+
+            string given_parity;
+            given_parity = vm["parity"].as<string>();
+
+
+            if (given_parity == "o"){
+                //parity = boost::asio::serial_port_base::parity(boost::asio::serial_port_base::parity::odd);
+            }
+            if (given_parity == "e"){
+                //parity = boost::asio::serial_port_base::parity::even;
+            }
+
+
+            //parity= boost::asio::serial_port_base::parity(boost::asio::serial_port_base::parity::none),
+
+            //cout << parity << endl;
+            //switch(boost::lexical_cast<int>(vm["parity"].as<string>())){
+                case NO:
+                    cout << "no parity" << endl;
+                    break;
+                case ODD:
+                    cout << "ungerade" << endl;
+                    break;
+                case EVEN:
+                    cout << "gerade" << endl;
+                    break;
+                case MARK:
+                    cout << "markiert" << endl;
+                    break;
+                case SPACE:
+                    cout << "Leerzeichen" << endl;
+                    break;
+                default:
+                    cout << "Passt nicht" << endl;
+            }
+        }
+        */
+
+        if (vm.count("interactive"))
+        {
+            cout << "Virtual console connection to " << com_port << " with :" << endl;
+            cout << "Baudrate: " << baudrate << endl;
+            cout << "Databits: " << databits << endl;
+            cout << "Stopbits: " << stopbits << endl;
+            cout << "Parity  : " << parity << endl;
+
             console();
             return 200;
         }
@@ -234,9 +298,15 @@ int main(int ac, char* av[])
         textfile.open(scale_file_directory / scale_file_name, ios_base::out);
         textfile.close();
 
-        cout << "Connection to " << fmp_com_port << " with " << fmp_baudrate << endl;
+        cout << "Connection to " << com_port << " with :" << endl;
+        cout << "Baudrate: " << baudrate << endl;
+        cout << "Databits: " << databits << endl;
+        cout << "Stopbits: " << stopbits << endl;
+        cout << "Parity  : " << parity << endl;
 
-        CallbackAsyncSerial serial(fmp_com_port, fmp_baudrate);
+        //CallbackAsyncSerial serial(com_port, baudrate);
+
+        CallbackAsyncSerial serial(com_port, baudrate);//, boost::asio::serial_port_base::character_size(databits), stopbits, );
         serial.setCallback(received);
         serial.writeString("<FP>");
         int first;
@@ -253,16 +323,18 @@ int main(int ac, char* av[])
             }
         }
 
+        cout << boost::asio::serial_port_base::parity::none;
+
         // Nummer Waage, wird intern erzeugt
-        static const boost::regex scale_number("^\\s*Nr.\\s*(?<nummer>\\d+).*$");
+        static const boost::regex scale_number("^\\s*[E]?Nr.\\s*(?<nummer>\\d+).*$");
         // Bereich
-        static const boost::regex scale_bereich("^\\s*Bereich\\s*(?<bereich>\\d+).*$");
+        static const boost::regex scale_bereich("^\\s*[E]?Bereich\\s*(?<bereich>\\d+).*$");
 
         // values (brutto, netto and tara) can have point (.) or comma (,)
         // Brutto
-        static const boost::regex scale_brutto("^\\s*Brutto\\s*(?<brutto>[-+]?\\d+[.,]\\d*)\\s*(?<einheit>\\S+).*$");
+        static const boost::regex scale_brutto("^\\s*[E]?Brutto\\s*(?<brutto>[-+]?\\d+[.,]\\d*)\\s*(?<einheit>\\S+).*$");
         //Tara
-        static const boost::regex scale_tara("^\\s*Tara\\s*(?<tara>[-+]?\\d+[.,]\\d*).*$");
+        static const boost::regex scale_tara("^\\s*[E]?Tara\\s*(?<tara>[-+]?\\d+[.,]\\d*).*$");
         //Netto
 
         // Netto needs special control values ASCII
@@ -355,6 +427,11 @@ int main(int ac, char* av[])
     catch(boost::program_options::invalid_command_line_syntax &e)
     {
         cout<<"Bitte Argument angeben: "<<e.what()<<endl;
+        return 2147483500;
+    }
+    catch(boost::bad_lexical_cast &e)
+    {
+        cout<<"Typ des Parameter falsch: "<<e.what()<<endl;
         return 2147483500;
     }
 }
