@@ -20,6 +20,7 @@
 #include <string>
 
 #include <map>
+#include "SimpleSerial.h"
 #include "AsyncSerial.h"
 
 namespace po = boost::program_options;
@@ -304,114 +305,59 @@ int main(int ac, char* av[])
         cout << "Stopbits: " << stopbits << endl;
         cout << "Parity  : " << parity << endl;
 
-        //CallbackAsyncSerial serial(com_port, baudrate);
 
-        CallbackAsyncSerial serial(com_port, baudrate);//, boost::asio::serial_port_base::character_size(databits), stopbits, );
-        serial.setCallback(received);
-        serial.writeString("<FP>");
-        int first;
-        int second;
-        bool still_changing = true;
-        while (still_changing)
+
+        try
         {
-            first = fs::file_size(scale_file_directory / scale_file_name);
-            boost::this_thread::sleep(pt::milliseconds(1000));
-            second = fs::file_size(scale_file_directory / scale_file_name);
-            if (second == first)
+
+            SimpleSerial serial(com_port, baudrate);
+
+            fs::ofstream outfile(scale_file_directory/scale_file_name, ios_base::app);
+            string line;
+            string right_line;
+            line = serial.readLine();
+            static const boost::regex weight_regex("(?<weight>(([0-9]+\\.[0-9]*)|([0-9]*\\.[0-9]+)|([0-9]+)))");
+            boost::smatch result;
+
+            for(std::string::size_type i = 0; i < line.size(); ++i)
             {
-                still_changing = false;
+                //if(line[i]==0x26) break;
+                //if(line[i]==0x26) break;
+                //(line[i]<32 || line[i]>=0x7f) break;
+                if(line[i]==0x26) break;
+                //if(line[i]==0x02) break;
+                if(line[i]>=0x7f) break;
+                if(line[i]>32 and line[i]!=127)
+                {
+                    right_line= right_line+line[i];
+                }
             }
+            outfile << right_line << endl;
+            outfile.close();
+            cout << right_line << endl;
+
+            float my_val;
+
+            if (regex_search(right_line, result, weight_regex))
+            {
+
+                my_val = boost::lexical_cast<double>(result.str("weight"));
+                my_val= my_val*1000;
+            }
+
+//            return boost::lexical_cast<int>(right_line+"000");
+
+
+
+            return boost::lexical_cast<int>(my_val);
+
         }
-
-        cout << boost::asio::serial_port_base::parity::none;
-
-        // Nummer Waage, wird intern erzeugt
-        static const boost::regex scale_number("^\\s*[E]?Nr.\\s*(?<nummer>\\d+).*$");
-        // Bereich
-        static const boost::regex scale_bereich("^\\s*[E]?Bereich\\s*(?<bereich>\\d+).*$");
-
-        // values (brutto, netto and tara) can have point (.) or comma (,)
-        // Brutto
-        static const boost::regex scale_brutto("^\\s*[E]?Brutto\\s*(?<brutto>[-+]?\\d+[.,]\\d*)\\s*(?<einheit>\\S+).*$");
-        //Tara
-        static const boost::regex scale_tara("^\\s*[E]?Tara\\s*(?<tara>[-+]?\\d+[.,]\\d*).*$");
-        //Netto
-
-        // Netto needs special control values ASCII
-        static const boost::regex scale_netto("^\\s*[E]?Netto\\s*(?<netto>[-+]?\\d+[.,]?\\d*).*$");
-
-        string current_line;
-        boost::smatch result;
-
-        map<string,string> scale_values;
-
-        fs::ifstream fin(scale_file_directory / scale_file_name);
-        while(getline(fin, current_line))
+        catch(boost::system::system_error& e)
         {
-            // Ende des Blocks erreicht, Aufbau der XML
-
-            if (regex_search(current_line, result, scale_number))
-            {
-                scale_values["nummer"] = result.str("nummer");
-                cout << "Nummer: " << result.str("nummer") << endl;
-            }
-
-            if (regex_search(current_line, result, scale_bereich))
-            {
-                scale_values["bereich"] = result.str("bereich");
-                cout << "Bereich: " << result.str("bereich") << endl;
-
-            }
-
-            if (regex_search(current_line, result, scale_brutto))
-            {
-                scale_values["brutto"] = result.str("brutto");
-                scale_values["einheit"] = result.str("einheit");
-                cout << "Einheit: " << result.str("einheit") << endl;
-                cout << "Brutto: " << result.str("brutto") << endl;
-
-
-            }
-
-            if (regex_search(current_line, result, scale_tara))
-            {
-                scale_values["tara"] = result.str("tara");
-                cout << "Tara: " << result.str("tara") << endl;
-            }
-
-            if (regex_search(current_line, result, scale_netto))
-            {
-                scale_values["netto"] = result.str("netto");
-                cout << "Netto: " << result.str("netto") << endl;
-            }
+            cout<<"Error: "<<e.what()<<endl;
+            return 1;
         }
 
-        map<string, string>::iterator iter = scale_values.find("netto");
-
-
-        string weight;
-
-
-        if ( scale_values.end() != iter ) {
-            weight = scale_values["netto"];
-        }
-        else
-        {
-            weight = scale_values["brutto"];
-        }
-
-        weight.erase(weight.end()-2, weight.end()-1);
-
-        int weight_return = boost::lexical_cast<int>(weight+"00");
-
-        if (weight_return >= 0)
-        {
-            return weight_return;
-        }
-        else
-        {
-            return 2147483500;
-        }
     }
     catch(boost::system::system_error& e)
     {
