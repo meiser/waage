@@ -8861,7 +8861,7 @@
 	<functional>
 	<new>
 
-1355309993 source:c:\projekte\waage\main.cpp
+1355314921 source:c:\projekte\waage\main.cpp
 	<iostream>
 	<boost/array.hpp>
 	<boost/asio.hpp>
@@ -8870,7 +8870,6 @@
 	<boost/program_options.hpp>
 	<boost/thread.hpp>
 	<boost/regex.hpp>
-	<tinyxml.h>
 	<string>
 	<map>
 

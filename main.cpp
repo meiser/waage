@@ -159,9 +159,7 @@ int main(int ac, char* av[])
             boost::asio::write(socket, boost::asio::buffer(message,sizeof(message)));//,boost::asio::transfer_all(),IgnoreError);
 
             boost::array<char, 50> buf;
-            size_t len = socket.read_some(boost::asio::buffer(buf), error);
-
-            //std::cout.write(buf.data(), len);
+            socket.read_some(boost::asio::buffer(buf), error);
 
             message = buf.data();
 
