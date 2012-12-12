@@ -10,23 +10,21 @@
 #define WAAGE_VERSION "0.1.0"
 
 #include <iostream>
+#include <boost/array.hpp>
+#include <boost/asio.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
-
 #include <boost/program_options.hpp>
 #include <boost/thread.hpp>
 #include <boost/regex.hpp>
-#include <tinyxml.h>
 #include <string>
-
 #include <map>
-#include "SimpleSerial.h"
-#include "AsyncSerial.h"
 
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 namespace pt = boost::posix_time;
 using namespace std;
+using boost::asio::ip::tcp;
 
 
 // globale Ordner timestamp_dir and diretory_name, created in main() on startup;
@@ -39,108 +37,16 @@ fs::path config_file_name("config");
 // directory for storing all scale files
 fs::path data_path("data");
 
-string com_port = "COM1";
-int baudrate = 9600;
-int databits = 8;
-int stopbits = 1;
-string parity = "0";
-
-//boost::asio::serial_port_base::parity parity(boost::asio::serial_port_base::parity::none);
-
-bool console_mode=false;
-
-
-// Callback , speichert Daten lokal zwischen
-void received(const char *data, unsigned int len)
-{
-    vector<char> v(data,data+len);
-    fs::ofstream outfile(scale_file_directory/scale_file_name, ios_base::app);
-    string line;
-    for(unsigned int i=0; i<v.size(); i++)
-    {
-        // Enfernung von Tabulatoren und Zeilenvorschub
-        switch(v[i])
-        {
-
-        case '\t':
-            break;
-        case '\r':
-            break;
-        case 0x1B:
-            cout << "Escape entfernt" << endl;
-            break;
-        case '\n':
-            line += v[i];
-            outfile << line;
-            line = "";
-            break;
-
-        default:
-            line += v[i];
-        }
-    }
-    outfile.close();
-}
-
-void received_for_console(const char *data, unsigned int len)
-{
-    vector<char> v(data,data+len);
-    for(unsigned int i=0; i<v.size(); i++)
-    {
-        if(v[i]=='\n')
-        {
-            cout<<endl;
-        }
-        else
-        {
-            if(v[i]<32 || v[i]>=0x7f) cout.put(' ');//Remove non-ascii char
-            else cout.put(v[i]);
-        }
-    }
-    cout.flush();//Flush screen buffer
-}
-
-int console()
-{
-    try
-    {
-        CallbackAsyncSerial serial(com_port, baudrate);
-        serial.setCallback(received_for_console);
-
-        string command = "";
-        cout << "Bitte Befehle eingeben, Beendigung mit Befehl exit + Enter" << endl;
-        while (command != "exit")
-        {
-            cin >> command;
-            if (command != "exit")
-            {
-                cout << endl;
-                cout << "Befehl "+ command+" wird abgeschickt" << endl;
-                cout << endl;
-
-                serial.writeString(command);
-            }
-            else
-            {
-                cout << "Programm wird beendet und COM Port geschlossen" << endl;
-                serial.close();
-            }
-        }
-    }
-    catch (std::exception& e)
-    {
-        cerr<<"Exception: "<<e.what()<<endl;
-        return 400;
-    }
-    return 200;
-}
+string host= "127.0.0.1";
+string port= "8000";
 
 
 void load_xml_settings(fs::path config_file_path)
 {
     fs::ifstream inFile(config_file_path);
-    static const boost::regex com_port_regex("^port:\\s*(?<port>\\w+).*$");
-    static const boost::regex baudrate_regex("^baudrate:\\s*(?<baudrate>\\d+).*$");
+    static const boost::regex port_regex("^port:\\s*(?<port>\\d+).*$");
+    static const boost::regex host_regex("^host:\\s*(?<host>\\S+).*$");
+    //^port:\s*(?<port>\d*)
     boost::smatch result;
     while ( inFile )
     {
@@ -148,21 +54,14 @@ void load_xml_settings(fs::path config_file_path)
         std::getline( inFile, current_line );
         if (inFile)
         {
-            if (regex_search(current_line, result, com_port_regex))
+            if (regex_search(current_line, result, port_regex))
             {
-                com_port = result.str("port");
+                port = result.str("port");
             }
 
-            if (regex_search(current_line, result, baudrate_regex))
+            if (regex_search(current_line, result, host_regex))
             {
-                try
-                {
-                    baudrate = boost::lexical_cast<int>(result.str("baudrate"));
-                }
-                catch( boost::bad_lexical_cast const& )
-                {
-                    std::cout << "Check the syntax of your config file" << std::endl;
-                }
+                host = result.str("host");
             }
         }
     }
@@ -181,13 +80,8 @@ int main(int ac, char* av[])
         desc.add_options()
         ("name,n", po::value<string>(), "name of file and directory for scale file")
         ("help,h", "produce help message")
-        ("interactive,i", "activate interactive COM Port mode")
-        ("comport,c", po::value<string>()->implicit_value(com_port), "used com port connection. e.g. COM1 or /dev/ttyS0")
-        ("baudrate,b", po::value<string>()->implicit_value(boost::lexical_cast<string>(baudrate)), "baudrate for com port connection")
-        ("databits,d", po::value<string>()->implicit_value(boost::lexical_cast<string>(databits)), "databits for com port connection")
-        ("stopbits,s", po::value<string>()->implicit_value(boost::lexical_cast<string>(stopbits)), "stopbits for com port connection")
-        ("parity,p", po::value<string>()->implicit_value(boost::lexical_cast<string>(parity)), "parity for com port connection: [n]o,[o]dd, [e]ven, [m]ark, [s]pace")
-
+        ("server,s", po::value<string>()->implicit_value(host), "used host for connection. e.g. 127.0.0.1 or localhost")
+        ("port,p", po::value<string>()->implicit_value(port), "used port for connection. e.g. 8000")
         ("file,f", po::value<string>(), "path to config file")
         ;
         po::variables_map vm;
@@ -211,76 +105,14 @@ int main(int ac, char* av[])
             return 200;
         }
 
-        if (vm.count("comport"))
+        if (vm.count("port"))
         {
-            com_port = vm["comport"].as<string>();
+            port = vm["port"].as<string>();
         }
 
-        if (vm.count("baudrate"))
+        if (vm.count("host"))
         {
-            baudrate = boost::lexical_cast<int>(vm["baudrate"].as<string>());
-        }
-
-        if (vm.count("databits"))
-        {
-            databits = boost::lexical_cast<int>(vm["databits"].as<string>());
-        }
-
-        if (vm.count("stopbits"))
-        {
-            stopbits = boost::lexical_cast<int>(vm["stopbits"].as<string>());
-        }
-
-        /*if (vm.count("parity"))
-        {
-
-            string given_parity;
-            given_parity = vm["parity"].as<string>();
-
-
-            if (given_parity == "o"){
-                //parity = boost::asio::serial_port_base::parity(boost::asio::serial_port_base::parity::odd);
-            }
-            if (given_parity == "e"){
-                //parity = boost::asio::serial_port_base::parity::even;
-            }
-
-
-            //parity= boost::asio::serial_port_base::parity(boost::asio::serial_port_base::parity::none),
-
-            //cout << parity << endl;
-            //switch(boost::lexical_cast<int>(vm["parity"].as<string>())){
-                case NO:
-                    cout << "no parity" << endl;
-                    break;
-                case ODD:
-                    cout << "ungerade" << endl;
-                    break;
-                case EVEN:
-                    cout << "gerade" << endl;
-                    break;
-                case MARK:
-                    cout << "markiert" << endl;
-                    break;
-                case SPACE:
-                    cout << "Leerzeichen" << endl;
-                    break;
-                default:
-                    cout << "Passt nicht" << endl;
-            }
-        }
-        */
-
-        if (vm.count("interactive"))
-        {
-            cout << "Virtual console connection to " << com_port << " with :" << endl;
-            cout << "Baudrate: " << baudrate << endl;
-            cout << "Databits: " << databits << endl;
-            cout << "Stopbits: " << stopbits << endl;
-            cout << "Parity  : " << parity << endl;
-
-            console();
-            return 200;
+            port = vm["host"].as<string>();
         }
 
 
@@ -299,58 +131,61 @@ int main(int ac, char* av[])
         textfile.open(scale_file_directory / scale_file_name, ios_base::out);
         textfile.close();
 
-        cout << "Connection to " << com_port << " with :" << endl;
-        cout << "Baudrate: " << baudrate << endl;
-        cout << "Databits: " << databits << endl;
-        cout << "Stopbits: " << stopbits << endl;
-        cout << "Parity  : " << parity << endl;
-
-
+        cout << "Connection to " << host << " on port: " <<  port << endl;
 
         try
         {
 
-            SimpleSerial serial(com_port, baudrate);
+            boost::asio::io_service io_service;
 
-            fs::ofstream outfile(scale_file_directory/scale_file_name, ios_base::app);
-            string line;
-            string right_line;
-            line = serial.readLine();
-            static const boost::regex weight_regex("(?<weight>(([0-9]+\\.[0-9]*)|([0-9]*\\.[0-9]+)|([0-9]+)))");
+            tcp::resolver resolver(io_service);
+            tcp::resolver::query query(host, port);
+            tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
+            tcp::resolver::iterator end;
+
+            tcp::socket socket(io_service);
+            std::string message("<FP>");
+            boost::system::error_code error = boost::asio::error::host_not_found;
+
+            while (error && endpoint_iterator != end)
+            {
+                socket.close();
+                socket.connect(*endpoint_iterator++, error);
+            }
+            if (error)
+                throw boost::system::system_error(error);
+
+
+            boost::asio::write(socket, boost::asio::buffer(message,sizeof(message)));//,boost::asio::transfer_all(),IgnoreError);
+
+            boost::array<char, 50> buf;
+            size_t len = socket.read_some(boost::asio::buffer(buf), error);
+
+            //std::cout.write(buf.data(), len);
+
+            message = buf.data();
+
+            static const boost::regex weight_regex("(\\d+)(?!.*\\d)");
             boost::smatch result;
 
-            for(std::string::size_type i = 0; i < line.size(); ++i)
+            int weight;
+
+            if (regex_search(message, result, weight_regex))
             {
-                //if(line[i]==0x26) break;
-                //if(line[i]==0x26) break;
-                //(line[i]<32 || line[i]>=0x7f) break;
-                if(line[i]==0x26) break;
-                //if(line[i]==0x02) break;
-                if(line[i]>=0x7f) break;
-                if(line[i]>32 and line[i]!=127)
-                {
-                    right_line= right_line+line[i];
-                }
+                weight = boost::lexical_cast<int>(result);
             }
-            outfile << right_line << endl;
+            else
+            {
+                weight = 0;
+            }
+
+            fs::ofstream outfile(scale_file_directory/scale_file_name, ios_base::app);
+            outfile << buf.data();
             outfile.close();
-            cout << right_line << endl;
 
-            float my_val;
-
-            if (regex_search(right_line, result, weight_regex))
-            {
-
-                my_val = boost::lexical_cast<double>(result.str("weight"));
-                my_val= my_val*1000;
-            }
-
-//            return boost::lexical_cast<int>(right_line+"000");
-
-
-
-            return boost::lexical_cast<int>(my_val);
-
+            weight= weight*1000;
+            cout << (weight);
+            return weight;
         }
         catch(boost::system::system_error& e)
         {

@@ -8861,8 +8861,10 @@
 	<functional>
 	<new>
 
-1353137063 source:c:\projekte\waage\main.cpp
+1355309993 source:c:\projekte\waage\main.cpp
 	<iostream>
+	<boost/array.hpp>
+	<boost/asio.hpp>
 	<boost/filesystem.hpp>
 	<boost/filesystem/fstream.hpp>
 	<boost/program_options.hpp>
@@ -8871,8 +8873,6 @@
 	<tinyxml.h>
 	<string>
 	<map>
-	"SimpleSerial.h"
-	"AsyncSerial.h"
 
 1340016057 d:\bibliotheken\boost\boost_1_50_0\boost\filesystem.hpp
 	<boost/filesystem/config.hpp>
